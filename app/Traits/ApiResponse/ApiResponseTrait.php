@@ -3,7 +3,6 @@
 namespace App\Traits\ApiResponse;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
 
 trait ApiResponseTrait
 {
@@ -13,21 +12,6 @@ trait ApiResponseTrait
         $meta = null,
         int $code = 200
     ): JsonResponse {
-
-        // Handle empty array or empty collection
-        if (
-            (is_array($data) && empty($data)) ||
-            ($data instanceof Collection && $data->isEmpty())
-        ) {
-            return response()->json([
-                'success' => true,
-                'message' => 'No records found.',
-                'data' => [],
-                'meta' => $meta,
-                'errors' => null
-            ], 200);
-        }
-
         return response()->json([
             'success' => true,
             'message' => $message,
@@ -49,17 +33,5 @@ trait ApiResponseTrait
             'meta' => null,
             'errors' => $errors
         ], $code);
-    }
-
-    protected function notFound(
-        string $message = 'Resource not found.'
-    ): JsonResponse {
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-            'data' => null,
-            'meta' => null,
-            'errors' => null
-        ], 404);
     }
 }

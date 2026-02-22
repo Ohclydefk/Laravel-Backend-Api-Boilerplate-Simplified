@@ -7,62 +7,76 @@ use Illuminate\Http\JsonResponse;
 use App\Services\UserService;
 use App\Traits\DataValidator\DataValidatorTrait;
 use App\Validations\UserValidation;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\BaseController;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
     use DataValidatorTrait;
 
-    public function __construct(
-        protected UserService $service
-    ) {}
+    protected UserService $service;
+
+    public function __construct(UserService $service)
+    {
+        $this->service = $service;
+    }
 
     public function index(Request $request): JsonResponse
     {
-        return $this->service->list($request);
+        $service = $this->service;
+
+        return $service->list($request);
     }
 
-    public function show($id): JsonResponse
+    public function show(int $id): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'data' => $this->service->find($id)
-        ]);
+        $service = $this->service;
+
+        return $this->success(
+            'User retrieved successfully.',
+            $service->find($id)
+        );
     }
 
     public function store(Request $request): JsonResponse
     {
+        $service = $this->service;
+
         $validated = $this->validateData(
             $request,
             UserValidation::store()
         );
 
-        return response()->json([
-            'success' => true,
-            'data' => $this->service->create($validated)
-        ], 201);
+        return $this->success(
+            'User created successfully.',
+            $service->create($validated),
+            null,
+            201
+        );
     }
 
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
+        $service = $this->service;
+
         $validated = $this->validateData(
             $request,
             UserValidation::update($id)
         );
 
-        return response()->json([
-            'success' => true,
-            'data' => $this->service->update($id, $validated)
-        ]);
+        return $this->success(
+            'User updated successfully.',
+            $service->update($id, $validated)
+        );
     }
 
-    public function destroy($id): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
-        $this->service->delete($id);
+        $service = $this->service;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Deleted successfully'
-        ]);
+        $service->delete($id);
+
+        return $this->success(
+            'User deleted successfully.'
+        );
     }
 }

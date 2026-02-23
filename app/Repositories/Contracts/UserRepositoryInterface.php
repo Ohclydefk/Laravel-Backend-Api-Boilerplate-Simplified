@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 interface UserRepositoryInterface
 {
-    public function paginate(Request $request);
+    public function index(Request $request);
     public function find(int $id);
     public function create(array $data);
     public function update(int $id, array $data);

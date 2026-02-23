@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\UserService;
-use App\Traits\DataValidator\DataValidatorTrait;
 use App\Validations\UserValidation;
 use App\Http\Controllers\BaseController;
 
 class UserController extends BaseController
 {
-    use DataValidatorTrait;
 
     protected UserService $service;
 

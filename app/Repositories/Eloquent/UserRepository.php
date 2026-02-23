@@ -22,16 +22,9 @@ class UserRepository implements UserRepositoryInterface
         'created_at'
     ];
 
-    public function paginate(Request $request)
+    public function index(Request $request)
     {
-        $query = User::query();
-
-        return $this->applyQueryFeatures(
-            $query,
-            $request,
-            $this->searchable,
-            $this->sortable
-        );
+        return $this->paginateList($request, new User, $this->searchable, $this->sortable);
     }
 
     public function find(int $id)

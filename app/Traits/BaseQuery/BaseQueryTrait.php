@@ -4,6 +4,7 @@ namespace App\Traits\BaseQuery;
 
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 
 trait BaseQueryTrait
@@ -73,5 +74,17 @@ trait BaseQueryTrait
                 'total' => $data->total(),
             ]
         ]);
+    }
+
+    protected function paginateList(Request $request, Model $model, $searchable, $sortable) : JsonResponse
+    {
+        $query = $model::query();
+
+        return $this->applyQueryFeatures(
+            $query,
+            $request,
+            $searchable,
+            $sortable
+        );
     }
 }

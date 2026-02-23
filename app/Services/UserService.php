@@ -14,7 +14,7 @@ class UserService
 
     public function list(Request $request)
     {
-        return $this->repository->paginate($request);
+        return $this->repository->index($request);
     }
 
     public function create(array $data)

@@ -3,24 +3,44 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Repositories\Eloquent\UserRepository;
-use App\Repositories\Eloquent\ProductRepository;
-use App\Repositories\Contracts\UserRepositoryInterface;
-use App\Repositories\Contracts\ProductRepositoryInterface;
+use App\Providers\RepositoryServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Register application services.
+     *
+     * IMPORTANT:
+     * ---------------------------------------------------------
+     * Repository bindings are NO LONGER handled here.
+     *
+     * They are automatically registered inside:
+     * App\Providers\RepositoryServiceProvider
+     *
+     * That provider:
+     * - Scans app/Repositories/Contracts
+     * - Finds all *RepositoryInterface.php files
+     * - Automatically binds them to their matching
+     *   Eloquent implementations
+     *
+     * Example convention:
+     *
+     * Interface:
+     *   App\Repositories\Contracts\UserRepositoryInterface
+     *
+     * Implementation:
+     *   App\Repositories\Eloquent\UserRepository
+     *
+     * Because of that automation, you DO NOT need to:
+     * - Import repository classes here
+     * - Manually call $this->app->bind()
+     *
+     * If you need manual binding (special cases),
+     * you may still define them here.
      */
     public function register(): void
     {
-        /**  Register the UserRepositoryInterface to UserRepository binding to avoid errors like the one i got:
-         * Target [App\Repositories\Contracts\UserRepositoryInterface] is not instantiable while building 
-         * [App\Http\Controllers\Api\UserController, App\Services\UserService].
-         */
-        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
-        $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
+        $this->app->register(RepositoryServiceProvider::class);
     }
 
     /**

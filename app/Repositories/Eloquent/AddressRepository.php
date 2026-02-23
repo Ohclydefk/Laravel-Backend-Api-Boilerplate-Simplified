@@ -6,6 +6,7 @@ use App\Models\Address;
 use Illuminate\Http\Request;
 use App\Traits\BaseQuery\BaseQueryTrait;
 use App\Repositories\Contracts\AddressRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class AddressRepository implements AddressRepositoryInterface
 {
@@ -29,11 +30,65 @@ class AddressRepository implements AddressRepositoryInterface
         'province',
         'postal_code',
         'country',
+        'created_at',
+    ];
+
+    protected array $allowedRelationships = [
+        'user'
+    ];
+
+    protected array $filterable = [
+        'user_id',
+        'city',
+        'province',
+        'country',
+        'is_default',
     ];
 
     public function index(Request $request)
     {
-        return $this->paginateList($request, new Address, $this->searchable, $this->sortable);
+        return $this->paginateList(
+            $request,
+            new Address,
+            $this->searchable,
+            $this->sortable,
+            $this->allowedRelationships,
+            $this->filterable,
+            function ($query, $request) {
+
+                // sample add computed column: full_address
+                // customized Query Example: Concatenate address fields into a full_address column
+                $query->addSelect([
+                    'addresses.*',
+                    DB::raw("
+                    TRIM(CONCAT(
+                        COALESCE(street, ''), ', ',
+                        COALESCE(barangay, ''), ', ',
+                        COALESCE(city, ''), ', ',
+                        COALESCE(province, ''), ', ',
+                        COALESCE(postal_code, ''), ', ',
+                        COALESCE(country, '')
+                    )) AS full_address
+                ")
+                ]);
+
+                // example: custom range filter
+                if ($request->filled('from')) {
+                    $query->whereDate('created_at', '>=', $request->input('from'));
+                }
+
+                if ($request->filled('to')) {
+                    $query->whereDate('created_at', '<=', $request->input('to'));
+                }
+
+                // example: constrain by related model
+                if ($request->filled('user_status')) {
+                    $query->whereHas('user', function ($q) use ($request) {
+                        $q->where('status', $request->input('user_status'));
+                    });
+                }
+            }
+        );
     }
 
     public function find(int $id)
@@ -48,15 +103,15 @@ class AddressRepository implements AddressRepositoryInterface
 
     public function update(int $id, array $data)
     {
-        $user = $this->find($id);
-        $user->update($data);
-        return $user;
+        $address = $this->find($id);
+        $address->update($data);
+        return $address;
     }
 
     public function delete(int $id)
     {
-        $user = $this->find($id);
-        $user->delete();
+        $address = $this->find($id);
+        $address->delete();
         return true;
     }
 }

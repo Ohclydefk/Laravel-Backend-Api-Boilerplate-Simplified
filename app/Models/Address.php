@@ -19,8 +19,8 @@ class Address extends Model
         'is_default',
     ];
 
-    public function users()
+    public function user()
     {
-        return $this->belongsTo(User::class)->withTimestamps();
+        return $this->belongsTo(User::class);
     }
 }

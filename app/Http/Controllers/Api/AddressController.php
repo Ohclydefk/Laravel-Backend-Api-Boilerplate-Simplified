@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use App\Services\ProductService;
+use App\Services\AddressService;
 use App\Validations\UserValidation;
 use App\Http\Controllers\BaseController;
 
-class ProductController extends BaseController
+class AddressController extends BaseController
 {
 
-    protected ProductService $service;
+    protected AddressService $service;
 
-    public function __construct(ProductService $service)
+    public function __construct(AddressService $service)
     {
         $this->service = $service;
     }
@@ -30,7 +30,7 @@ class ProductController extends BaseController
         $service = $this->service;
 
         return $this->success(
-            'Product retrieved successfully.',
+            'Address retrieved successfully.',
             $service->find($id)
         );
     }
@@ -45,7 +45,7 @@ class ProductController extends BaseController
         );
 
         return $this->success(
-            'Product created successfully.',
+            'User created successfully.',
             $service->create($validated),
             null,
             201
@@ -62,7 +62,7 @@ class ProductController extends BaseController
         );
 
         return $this->success(
-            'Product updated successfully.',
+            'Address updated successfully.',
             $service->update($id, $validated)
         );
     }
@@ -74,7 +74,7 @@ class ProductController extends BaseController
         $service->delete($id);
 
         return $this->success(
-            'Product deleted successfully.'
+            'Address deleted successfully.'
         );
     }
 }

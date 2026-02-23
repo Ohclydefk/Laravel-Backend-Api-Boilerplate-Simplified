@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
-use App\Repositories\Contracts\ProductRepositoryInterface;
+use App\Repositories\Contracts\AddressRepositoryInterface;
 
-class ProductService
+class AddressService
 {
     public function __construct(
-        protected ProductRepositoryInterface $repository
+        protected AddressRepositoryInterface $repository
     ) {}
 
     public function list(Request $request)

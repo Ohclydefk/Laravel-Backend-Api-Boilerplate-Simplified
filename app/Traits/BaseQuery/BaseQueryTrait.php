@@ -38,8 +38,8 @@ trait BaseQueryTrait
          * - Only columns in the $sortable array can be sorted on to prevent abuse
          * - If sort_by is not in the $sortable array, it will be ignored and default sorting will be applied
          */
-        $sortBy = $request->get('sort_by');
-        $sortDirection = strtolower($request->get('sort_direction', 'asc'));
+        $sortBy = $request->input('sort_by');
+        $sortDirection = strtolower($request->input('sort_direction', 'asc'));
 
         if ($sortBy && in_array($sortBy, $sortable)) {
             $sortDirection = in_array($sortDirection, ['asc', 'desc'])
@@ -58,7 +58,7 @@ trait BaseQueryTrait
          * - Client can specify ?per_page=20 to change the number of items per page
          * - If not specified, the default is 10 items per page
          **/
-        $perPage = (int) $request->get('per_page', 10);
+        $perPage = (int) $request->input('per_page', 10);
         $perPage = $perPage > 100 ? 100 : $perPage;
 
         $data = $query->paginate($perPage);

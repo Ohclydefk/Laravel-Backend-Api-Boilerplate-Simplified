@@ -45,4 +45,25 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class)->withTimestamps();
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->permissions()->where('name', $permission)->exists();
+    }
+
+    public function hasAnyPermission(array $permissions): bool
+    {
+        return $this->permissions()->whereIn('name', $permissions)->exists();
+    }
+
+    public function hasAllPermissions(array $permissions): bool
+    {
+        $count = $this->permissions()->whereIn('name', $permissions)->count();
+        return $count === count($permissions);
+    }
 }

@@ -4,12 +4,16 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Traits\BaseQuery\BaseQueryTrait;
+use App\Repositories\BaseRepository;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use Illuminate\Support\Facades\Hash;
 
-class UserRepository implements UserRepositoryInterface
+class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
-    use BaseQueryTrait;
+    public function __construct(User $model)
+    {
+        parent::__construct($model);
+    }
 
     protected array $searchable = [
         'name',
@@ -22,32 +26,38 @@ class UserRepository implements UserRepositoryInterface
         'created_at'
     ];
 
+    protected array $allowedRelationships = [];
+
+    protected array $filterable = [
+        'name',
+        'email'
+    ];
+
     public function index(Request $request)
     {
-        return $this->paginateList($request, new User, $this->searchable, $this->sortable);
+        $baseModel = $this->model; // use the base model
+        $isSearchable = $this->searchable;
+        $isSortable = $this->sortable;
+        $relations = $this->allowedRelationships;
+        $isFilterable = $this->filterable;
+
+        return $this->paginateList(
+            $request,
+            $baseModel,
+            $isSearchable,
+            $isSortable
+        );
     }
 
-    public function find(int $id)
-    {
-        return User::findOrFail($id);
-    }
 
-    public function create(array $data)
-    {
-        return User::create($data);
-    }
-
+    // Fully Customizable (override) the function from Base Repository
     public function update(int $id, array $data)
     {
-        $user = $this->find($id);
-        $user->update($data);
-        return $user;
-    }
+        // Custom logic before calling parent
+        if (isset($data['password']) && !empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
 
-    public function delete(int $id)
-    {
-        $user = $this->find($id);
-        $user->delete();
-        return true;
+        return parent::update($id, $data);
     }
 }

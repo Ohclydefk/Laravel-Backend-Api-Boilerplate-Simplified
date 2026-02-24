@@ -4,12 +4,15 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
-use App\Traits\BaseQuery\BaseQueryTrait;
+use App\Repositories\BaseRepository;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 
-class ProductRepository implements ProductRepositoryInterface
+class ProductRepository extends BaseRepository implements ProductRepositoryInterface
 {
-    use BaseQueryTrait;
+    public function __construct(Product $model)
+    {
+        parent::__construct($model);
+    }
 
     protected array $searchable = [
         'name',
@@ -28,32 +31,30 @@ class ProductRepository implements ProductRepositoryInterface
         'stock',
     ];
 
+    protected array $allowedRelationships = [];
+
+    protected array $filterable = [
+        'name',
+        'slug',
+        'description',
+        'sku',
+        'price',
+        'stock',
+    ];
+
     public function index(Request $request)
     {
-        return $this->paginateList($request, new Product, $this->searchable, $this->sortable);
-    }
+        $baseModel = $this->model; // use the base model
+        $isSearchable = $this->searchable;
+        $isSortable = $this->sortable;
+        $relations = $this->allowedRelationships;
+        $isFilterable = $this->filterable;
 
-    public function find(int $id)
-    {
-        return Product::findOrFail($id);
-    }
-
-    public function create(array $data)
-    {
-        return Product::create($data);
-    }
-
-    public function update(int $id, array $data)
-    {
-        $user = $this->find($id);
-        $user->update($data);
-        return $user;
-    }
-
-    public function delete(int $id)
-    {
-        $user = $this->find($id);
-        $user->delete();
-        return true;
+        return $this->paginateList(
+            $request,
+            $baseModel, 
+            $isSearchable,
+            $isSortable
+        );
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\ProductService;
-use App\Validations\UserValidation;
+use App\Validations\ProductValidation;
 use App\Http\Controllers\BaseController;
 
 class ProductController extends BaseController
@@ -41,7 +41,7 @@ class ProductController extends BaseController
 
         $validated = $this->validateData(
             $request,
-            UserValidation::store()
+            ProductValidation::store()
         );
 
         return $this->success(
@@ -58,7 +58,7 @@ class ProductController extends BaseController
 
         $validated = $this->validateData(
             $request,
-            UserValidation::update($id)
+            ProductValidation::update($id)
         );
 
         return $this->success(

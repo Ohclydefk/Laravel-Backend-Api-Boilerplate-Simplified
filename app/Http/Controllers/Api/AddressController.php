@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\AddressService;
-use App\Validations\UserValidation;
+use App\Validations\AddressValidation;
 use App\Http\Controllers\BaseController;
 
 class AddressController extends BaseController
@@ -41,11 +41,11 @@ class AddressController extends BaseController
 
         $validated = $this->validateData(
             $request,
-            UserValidation::store()
+            AddressValidation::store()
         );
 
         return $this->success(
-            'User created successfully.',
+            'Address created successfully.',
             $service->create($validated),
             null,
             201
@@ -58,7 +58,7 @@ class AddressController extends BaseController
 
         $validated = $this->validateData(
             $request,
-            UserValidation::update($id)
+            AddressValidation::update($id)
         );
 
         return $this->success(

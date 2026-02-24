@@ -4,13 +4,16 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Address;
 use Illuminate\Http\Request;
-use App\Traits\BaseQuery\BaseQueryTrait;
-use App\Repositories\Contracts\AddressRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use App\Repositories\BaseRepository;
+use App\Repositories\Contracts\AddressRepositoryInterface;
 
-class AddressRepository implements AddressRepositoryInterface
+class AddressRepository extends BaseRepository implements AddressRepositoryInterface
 {
-    use BaseQueryTrait;
+    public function __construct(Address $model)
+    {
+        parent::__construct($model);
+    }
 
     protected array $searchable = [
         'label',
@@ -47,32 +50,35 @@ class AddressRepository implements AddressRepositoryInterface
 
     public function index(Request $request)
     {
+        $baseModel = $this->model; // use the base model
+        $isSearchable = $this->searchable;
+        $isSortable = $this->sortable;
+        $relations = $this->allowedRelationships;
+        $isFilterable = $this->filterable;
+
         return $this->paginateList(
             $request,
-            new Address,
-            $this->searchable,
-            $this->sortable,
-            $this->allowedRelationships,
-            $this->filterable,
+            $baseModel,
+            $isSearchable,
+            $isSortable,
+            $relations,
+            $isFilterable,
             function ($query, $request) {
 
-                // sample add computed column: full_address
-                // customized Query Example: Concatenate address fields into a full_address column
                 $query->addSelect([
                     'addresses.*',
                     DB::raw("
-                    TRIM(CONCAT(
-                        COALESCE(street, ''), ', ',
-                        COALESCE(barangay, ''), ', ',
-                        COALESCE(city, ''), ', ',
-                        COALESCE(province, ''), ', ',
-                        COALESCE(postal_code, ''), ', ',
-                        COALESCE(country, '')
-                    )) AS full_address
-                ")
+                        TRIM(CONCAT(
+                            COALESCE(street, ''), ', ',
+                            COALESCE(barangay, ''), ', ',
+                            COALESCE(city, ''), ', ',
+                            COALESCE(province, ''), ', ',
+                            COALESCE(postal_code, ''), ', ',
+                            COALESCE(country, '')
+                        )) AS full_address
+                    ")
                 ]);
 
-                // example: custom range filter
                 if ($request->filled('from')) {
                     $query->whereDate('created_at', '>=', $request->input('from'));
                 }
@@ -81,7 +87,6 @@ class AddressRepository implements AddressRepositoryInterface
                     $query->whereDate('created_at', '<=', $request->input('to'));
                 }
 
-                // example: constrain by related model
                 if ($request->filled('user_status')) {
                     $query->whereHas('user', function ($q) use ($request) {
                         $q->where('status', $request->input('user_status'));
@@ -89,29 +94,5 @@ class AddressRepository implements AddressRepositoryInterface
                 }
             }
         );
-    }
-
-    public function find(int $id)
-    {
-        return Address::findOrFail($id);
-    }
-
-    public function create(array $data)
-    {
-        return Address::create($data);
-    }
-
-    public function update(int $id, array $data)
-    {
-        $address = $this->find($id);
-        $address->update($data);
-        return $address;
-    }
-
-    public function delete(int $id)
-    {
-        $address = $this->find($id);
-        $address->delete();
-        return true;
     }
 }
